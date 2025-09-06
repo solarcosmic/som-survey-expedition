@@ -11,6 +11,11 @@
             color: #ffffff;
             text-align: center;
             font-family: "Epunda Slab", sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         #roll_die {
             color: #ffffff;
@@ -20,9 +25,11 @@
     </style>
 </head>
 <body>
-    <h1>Welcome to Spanky's!</h1>
-    <p>roll a die!</p>
-    <button id="roll_die">roll the d20..</button>
+    <div id="container">
+        <h1 class="item">Welcome to Spanky's!</h1>
+        <p class="item">roll a die!</p>
+        <button id="roll_die" class="item">roll the d20..</button>
+    </div>
     <script>
         const rolldie = document.getElementById("roll_die");
         rolldie.addEventListener("click", () => {
