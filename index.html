@@ -4,11 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Epunda+Slab:ital,wght@0,300..900;1,300..900&display=swap');
+        body {
+            background-color: black;
+            color: #ffffff;
+            text-align: center;
+            font-family: "Epunda Slab", sans-serif;
+        }
+        #roll_die {
+            color: #ffffff;
+            background-color: black;
+            padding: 16px 16px;
+        }
+    </style>
 </head>
 <body>
     <h1>Welcome to Spanky's!</h1>
     <p>roll a die!</p>
-    <button id="roll_die">click me to roll a d20</button>
+    <button id="roll_die">roll the d20..</button>
     <script>
         const rolldie = document.getElementById("roll_die");
         rolldie.addEventListener("click", () => {
