@@ -6,11 +6,13 @@
     <title>Document</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Epunda+Slab:ital,wght@0,300..900;1,300..900&display=swap');
+        * {
+            font-family: "Epunda Slab", sans-serif;
+        }
         body {
             background-color: black;
             color: #ffffff;
             text-align: center;
-            font-family: "Epunda Slab", sans-serif;
             height: 100vh;
             margin: 0;
             display: flex;
@@ -29,12 +31,19 @@
         <h1 class="item">Welcome to Spanky's!</h1>
         <p class="item">roll a die!</p>
         <button id="roll_die" class="item">roll the d20..</button>
+        <p id="rolled"></p>
     </div>
     <script>
         const rolldie = document.getElementById("roll_die");
         rolldie.addEventListener("click", () => {
             const ran = Math.floor(Math.random() * 21);
-            alert("You rolled a " + ran + "!");
+            if (ran < 19) {
+                document.getElementById("rolled").textContent = "hey.. it seems like you rolled a " + ran + ".. i don't know if that's good enough.. try again..";
+            } else if (ran == 19) {
+                document.getElementById("rolled").textContent = "spanky sees that you've rolled " + ran + ". he's ok with that!";
+            } else if (ran == 20) {
+                document.getElementById("rolled").textContent = "a nat 20! spanky is proud.";
+            }
         })
     </script>
 </body>
