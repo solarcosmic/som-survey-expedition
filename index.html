@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>Welcome to Spanky's!</h1>
+    <p>roll a die!</p>
+    <button id="roll_die">click me to roll a d20</button>
+    <script>
+        const rolldie = document.getElementById("roll_die");
+        rolldie.addEventListener("click", () => {
+            const ran = Math.floor(Math.random() * 21);
+            alert("You rolled a " + ran + "!");
+        })
+    </script>
+</body>
+</html>
