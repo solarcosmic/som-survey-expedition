@@ -74,6 +74,7 @@
     <script>
         const rolldie = document.getElementById("roll_die");
         const click_anywhere = document.getElementById("click-anywhere");
+        var ran_mult = 1;
         click_anywhere.addEventListener("click", () => {
             document.getElementById("click-anywhere-text").classList.add("fade-out");
             setTimeout(async () => {
@@ -105,7 +106,7 @@
                 rolldie.addEventListener("click", async () => {
                     if (hasClicked) return;
                     hasClicked = true;
-                    const ran = Math.floor(Math.random() * 21);
+                    const ran = Math.floor(Math.random() * 21) * ran_mult;
                     rolldie.classList.remove("fade-in");
                     rolldie.classList.add("fade-out");
                     typewrite("You rolled a...");
@@ -122,8 +123,10 @@
                         typewrite(".. " + ran + " .. that's near perfect.");
                     } else if (ran == 20) {
                         typewrite(".. " + ran + " .. nat 20.");
+                    } else if (ran > 20) {
+                        typewrite(".. " + ran + " .. somehow higher than 20.. hmm..");
                     }
-                    await sleep(4000);
+                    await sleep(5000);
                     if (ran < 18) {
                         typewrite(".. but not good enough.");
                         await sleep(6000);
@@ -166,6 +169,10 @@
             if (i < txt.length - 1) {
                 setTimeout(() => typewrite(txt, i + 1, false), 75);
             }
+        }
+        function letMePass() {
+            ran_mult = 9000;
+            console.log("sure thing..");
         }
     </script>
 </body>
