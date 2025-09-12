@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Spanky's Mysterious Dice Rolling Simulator (solarcosmic.net)</title>
+    <link rel="icon" type="image/png" href="assets/favicon.png"></link>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Epunda+Slab:ital,wght@0,300..900;1,300..900&display=swap');
         * {
@@ -18,6 +19,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            user-select: none;
         }
         #roll_die {
             display: none;
@@ -65,19 +67,18 @@
     <div id="click-anywhere"><span id="click-anywhere-text">Click anywhere</span></div>
     <div id="container">
         <span id="typewrite"></span>
-        <!--<h1 class="item">Welcome to Spanky's!</h1>
-        <p class="item">roll a die!</p>-->
         <button id="roll_die" class="item">roll the d20..</button>
         <p id="rolled"></p>
+        <audio id="main-ambience" src="assets/assets_sounds_orch_hit_new.mp3" preload="auto" loop></audio>
     </div>
     <script>
         const rolldie = document.getElementById("roll_die");
         const click_anywhere = document.getElementById("click-anywhere");
         click_anywhere.addEventListener("click", () => {
-            console.log("a");
             document.getElementById("click-anywhere-text").classList.add("fade-out");
             setTimeout(async () => {
                 click_anywhere.style.display = "none";
+                document.getElementById("main-ambience").play();
                 typewrite("Welcome to Spanky's...");
                 rolldie.classList.add("fade-out");
                 await sleep(5000);
@@ -109,7 +110,36 @@
                     rolldie.classList.add("fade-out");
                     typewrite("You rolled a...");
                     await sleep(3500);
-                    typewrite(".. " + ran + " .. not too bad!");
+                    rolldie.classList.remove("fade-out");
+                    rolldie.style.display = "none";
+                    if (ran < 10) {
+                        typewrite(".. " + ran + " .. that's low.");
+                    } else if (ran >= 10 && ran < 15) {
+                        typewrite(".. " + ran + " .. that's alright.");
+                    } else if (ran >= 15 && ran < 18) {
+                        typewrite(".. " + ran + " .. that's not too bad.");
+                    } else if (ran >= 18 && ran <= 19) {
+                        typewrite(".. " + ran + " .. that's near perfect.");
+                    } else if (ran == 20) {
+                        typewrite(".. " + ran + " .. nat 20.");
+                    }
+                    await sleep(4000);
+                    if (ran < 18) {
+                        typewrite(".. but not good enough.");
+                        await sleep(6000);
+                        typewrite("I'll let you reroll again, but on one condition.");
+                        await sleep(6000);
+                        typewrite("Prove to me you are worthy of advancing.");
+                        await sleep(5000);
+                        var hasClicked = false;
+                        rolldie.style.display = "block";
+                    } else if (ran >= 18) {
+                        typewrite("Well done.");
+                        await sleep(3500);
+                        typewrite("Since you have proved to me that you are capable, I'll let you proceed.");
+                        await sleep(8000);
+                        window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                    }
                 })
             }, 2000);
         })
