@@ -20,22 +20,104 @@
             align-items: center;
         }
         #roll_die {
+            display: none;
             color: #ffffff;
             background-color: black;
             padding: 16px 16px;
         }
+        #click-anywhere {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: black;
+            color: #ffffff;
+            text-align: center;
+            cursor: pointer;
+            font-size: 30px;
+        }
+        #click-anywhere-text {
+            opacity: 1;
+            transition: 1s;
+        }
+        #click-anywhere-text.fade-out {
+            opacity: 0;
+            transition: 1s;
+        }
+        #roll_die.fade-in {
+            opacity: 1;
+            transition: 1s;
+        }
+        #roll_die.fade-out {
+            opacity: 0;
+            transition: 1s;
+        }
+        #typewrite {
+            font-size: 25px;
+        }
     </style>
 </head>
 <body>
+    <div id="click-anywhere"><span id="click-anywhere-text">Click anywhere</span></div>
     <div id="container">
-        <h1 class="item">Welcome to Spanky's!</h1>
-        <p class="item">roll a die!</p>
+        <span id="typewrite"></span>
+        <!--<h1 class="item">Welcome to Spanky's!</h1>
+        <p class="item">roll a die!</p>-->
         <button id="roll_die" class="item">roll the d20..</button>
         <p id="rolled"></p>
     </div>
     <script>
         const rolldie = document.getElementById("roll_die");
-        rolldie.addEventListener("click", () => {
+        const click_anywhere = document.getElementById("click-anywhere");
+        click_anywhere.addEventListener("click", () => {
+            console.log("a");
+            document.getElementById("click-anywhere-text").classList.add("fade-out");
+            setTimeout(async () => {
+                click_anywhere.style.display = "none";
+                typewrite("Welcome to Spanky's...");
+                rolldie.classList.add("fade-out");
+                await sleep(5000);
+                var hrs = new Date().getHours()
+                const isDayTime = hrs > 6 && hrs < 20 // https://stackoverflow.com/a/46908558
+                var timeOfDay = "right now?";
+                if (hrs > 6 && hrs < 12) {
+                    timeOfDay = "this morning?";
+                } else if (hrs >= 12 && hrs < 18) {
+                    timeOfDay = "this afternoon?";
+                } else if (hrs >= 18 && hrs < 24) {
+                    timeOfDay = "tonight?";
+                }
+                typewrite("Feeling hopeful " + timeOfDay);
+                await sleep(5000);
+                typewrite("That's brilliant, but you have a choice to make.");
+                await sleep(7000);
+                typewrite("Click the button to roll a D20, and let's see what you get.");
+                await sleep(7000);
+                rolldie.style.display = "block";
+                rolldie.classList.remove("fade-out");
+                rolldie.classList.add("fade-in");
+                var hasClicked = false;
+                rolldie.addEventListener("click", async () => {
+                    if (hasClicked) return;
+                    hasClicked = true;
+                    const ran = Math.floor(Math.random() * 21);
+                    rolldie.classList.remove("fade-in");
+                    rolldie.classList.add("fade-out");
+                    typewrite("You rolled a...");
+                    await sleep(3500);
+                    typewrite(".. " + ran + " .. not too bad!");
+                })
+            }, 2000);
+        })
+        /* https://www.sitepoint.com/delay-sleep-pause-wait/ */
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        /*rolldie.addEventListener("click", () => {
             const ran = Math.floor(Math.random() * 21);
             if (ran < 19) {
                 document.getElementById("rolled").textContent = "hey.. it seems like you rolled a " + ran + ".. i don't know if that's good enough.. try again..";
@@ -44,7 +126,17 @@
             } else if (ran == 20) {
                 document.getElementById("rolled").textContent = "a nat 20! spanky is proud.";
             }
-        })
+        })*/
+        var typewrite_i = 0;
+        function typewrite(txt, i = 0, refresh = true) {
+            if (refresh) {
+                document.getElementById("typewrite").textContent = "";
+            }
+            document.getElementById("typewrite").textContent += txt.charAt(i);
+            if (i < txt.length - 1) {
+                setTimeout(() => typewrite(txt, i + 1, false), 75);
+            }
+        }
     </script>
 </body>
 </html>
