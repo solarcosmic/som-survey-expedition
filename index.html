@@ -21,7 +21,7 @@
             align-items: center;
             user-select: none;
         }
-        #roll_die {
+        .select-button {
             display: none;
             color: #ffffff;
             background-color: black;
@@ -50,11 +50,11 @@
             opacity: 0;
             transition: 1s;
         }
-        #roll_die.fade-in {
+        .select-button.fade-in {
             opacity: 1;
             transition: 1s;
         }
-        #roll_die.fade-out {
+        .select-button.fade-out {
             opacity: 0;
             transition: 1s;
         }
@@ -67,14 +67,18 @@
     <div id="click-anywhere"><span id="click-anywhere-text">Click anywhere</span></div>
     <div id="container">
         <span id="typewrite"></span>
-        <button id="roll_die" class="item">roll the d20..</button>
+        <button id="roll_die" class="item select-button">roll the d20..</button>
         <p id="rolled"></p>
         <audio id="main-ambience" src="assets/assets_sounds_orch_hit_new.mp3" preload="auto" loop></audio>
+        <button id="odd" class="item select-button" style="display: none;">Odd</button>
+        <button id="even" class="item select-button" style="display: none;">Even</button>
     </div>
     <script>
         const rolldie = document.getElementById("roll_die");
         const click_anywhere = document.getElementById("click-anywhere");
         var ran_mult = 1;
+        var isSecondTime = false;
+        var selection = "odds";
         click_anywhere.addEventListener("click", () => {
             document.getElementById("click-anywhere-text").classList.add("fade-out");
             setTimeout(async () => {
@@ -106,14 +110,16 @@
                 rolldie.addEventListener("click", async () => {
                     if (hasClicked) return;
                     hasClicked = true;
-                    const ran = Math.floor(Math.random() * 21) * ran_mult;
+                    const ran = Math.floor(Math.random() * 21) * ran_mult; // TODO: can't be 0
                     rolldie.classList.remove("fade-in");
                     rolldie.classList.add("fade-out");
                     typewrite("You rolled a...");
                     await sleep(3500);
                     rolldie.classList.remove("fade-out");
                     rolldie.style.display = "none";
-                    if (ran < 10) {
+                    if (ran == 4 || ran == 13) {
+                        typewrite(".. " + ran + " .. unlucky for some.");
+                    } else if (ran < 10) {
                         typewrite(".. " + ran + " .. that's low.");
                     } else if (ran >= 10 && ran < 15) {
                         typewrite(".. " + ran + " .. that's alright.");
@@ -127,21 +133,46 @@
                         typewrite(".. " + ran + " .. somehow higher than 20.. hmm..");
                     }
                     await sleep(5000);
-                    if (ran < 18) {
-                        typewrite(".. but not good enough.");
-                        await sleep(6000);
-                        typewrite("I'll let you reroll again, but on one condition.");
-                        await sleep(6000);
-                        typewrite("Prove to me you are worthy of advancing.");
-                        await sleep(5000);
-                        var hasClicked = false;
-                        rolldie.style.display = "block";
-                    } else if (ran >= 18) {
-                        typewrite("Well done.");
-                        await sleep(3500);
-                        typewrite("Since you have proved to me that you are capable, I'll let you proceed.");
-                        await sleep(8000);
-                        window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                    console.log(isSecondTime);
+                    if (isSecondTime == false) {
+                        console.log("triggered");
+                        if (ran < 18) {
+                            typewrite(".. but not good enough.");
+                            await sleep(6000);
+                            typewrite("I'll let you reroll again, but on one condition.");
+                            await sleep(6000);
+                            typewrite("Prove to me you are worthy of advancing.");
+                            await sleep(5000);
+                            var hasClicked = false;
+                            isSecondTime = true
+                            rolldie.style.display = "block";
+                        } else if (ran >= 18) {
+                            typewrite("Well done.");
+                            await sleep(3500);
+                            typewrite("Since you have proved to me that you are capable, I'll let you proceed.");
+                            await sleep(8000);
+                            window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                        }
+                    } else if (isSecondTime == true) {
+                        if (ran < 18) {
+                            typewrite("Since you have not proved to me you are capable, I'll roll a D6.");
+                            await sleep(6500);
+                            typewrite("Let's make this 50/50. Odd or even?");
+                            await sleep(4000);
+                            document.getElementById("odd").style.opacity = 0;
+                            document.getElementById("even").style.opacity = 0;
+                            document.getElementById("odd").style.display = "block";
+                            document.getElementById("even").style.display = "block";
+                            document.getElementById("odd").classList.add("fade-in");
+                            document.getElementById("even").classList.add("fade-out");
+                            //rolldie.classList.add("fade-out");
+                        } else if (ran >= 18) {
+                            typewrite("For your second try, well done.");
+                            await sleep(3500);
+                            typewrite("Since you have proved to me that you are capable, I'll let you proceed.");
+                            await sleep(8000);
+                            window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                        }
                     }
                 })
             }, 2000);
@@ -150,16 +181,6 @@
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
-        /*rolldie.addEventListener("click", () => {
-            const ran = Math.floor(Math.random() * 21);
-            if (ran < 19) {
-                document.getElementById("rolled").textContent = "hey.. it seems like you rolled a " + ran + ".. i don't know if that's good enough.. try again..";
-            } else if (ran == 19) {
-                document.getElementById("rolled").textContent = "spanky sees that you've rolled " + ran + ". he's ok with that!";
-            } else if (ran == 20) {
-                document.getElementById("rolled").textContent = "a nat 20! spanky is proud.";
-            }
-        })*/
         var typewrite_i = 0;
         function typewrite(txt, i = 0, refresh = true) {
             if (refresh) {
