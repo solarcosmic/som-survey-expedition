@@ -159,12 +159,12 @@
                             await sleep(6500);
                             typewrite("Let's make this 50/50. Odd or even?");
                             await sleep(4000);
-                            document.getElementById("odd").style.opacity = 0;
-                            document.getElementById("even").style.opacity = 0;
+                            document.getElementById("odd").style.opacity = 1;
+                            document.getElementById("even").style.opacity = 1;
                             document.getElementById("odd").style.display = "block";
                             document.getElementById("even").style.display = "block";
                             document.getElementById("odd").classList.add("fade-in");
-                            document.getElementById("even").classList.add("fade-out");
+                            document.getElementById("even").classList.add("fade-in");
                             //rolldie.classList.add("fade-out");
                         } else if (ran >= 18) {
                             typewrite("For your second try, well done.");
