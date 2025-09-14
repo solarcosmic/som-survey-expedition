@@ -78,7 +78,6 @@
         const click_anywhere = document.getElementById("click-anywhere");
         var ran_mult = 1;
         var isSecondTime = false;
-        var selection = "odds";
         click_anywhere.addEventListener("click", () => {
             document.getElementById("click-anywhere-text").classList.add("fade-out");
             setTimeout(async () => {
@@ -176,7 +175,60 @@
                     }
                 })
             }, 2000);
+        });
+        var hasChosenSelection = false;
+        document.getElementById("odd").addEventListener("click", () => {
+            if (!hasChosenSelection) finalMainPhase("odd");
         })
+        document.getElementById("even").addEventListener("click", () => {
+            if (!hasChosenSelection) finalMainPhase("even");
+        })
+        async function finalMainPhase(selection) {
+            if (selection == "odd") {
+                await sleep(1000);
+                typewrite("You chose Odd... time to roll.");
+                await sleep(3000);
+            } else if (selection == "even") {
+                await sleep(1000);
+                typewrite("You chose Even... time to roll.");
+                await sleep(3000);
+            }
+            const ran = Math.floor(Math.random() * 7) * ran_mult; // TODO: can't be 0
+            typewrite("The D6 rolled..");
+            await sleep(2000);
+            var success = false;
+            if (Math.abs(ran % 2) == 1) { // odd https://stackoverflow.com/a/6211660
+                if (selection == "odd") {
+                    success = true;
+                    typewrite(".. " + ran + ".. indeed an odd.");
+                } else if (selection == "even") {
+                    success = false;
+                    typewrite(".. " + ran + ".. an even.");
+                }
+            } else if (ran % 2 == 0) { // even https://stackoverflow.com/a/6211660
+                if (selection == "odd") {
+                    success = false;
+                    typewrite(".. " + ran + ".. an odd.");
+                } else if (selection == "even") {
+                    success = true;
+                    typewrite(".. " + ran + ".. indeed an even.");
+                }
+            }
+            if (success) {
+                typewrite("Well done.");
+            } else {
+                typewrite("It hasn't been going so well, has it?");
+                await sleep(3500);
+                typewrite("No more chances. I'm afraid I'll have to send you back.");
+                await sleep(3500);
+                typewrite("I'm going to roll another D6. This determines what neighbor you'll end up on.");
+                await sleep(3500);
+                typewrite("I rolled..");
+                await sleep(3500);
+                const ran = Math.floor(Math.random() * 7) * ran_mult; // TODO: can't be 0
+                typewrite(".. " + ran + " ..");
+            }
+        }
         /* https://www.sitepoint.com/delay-sleep-pause-wait/ */
         function sleep(ms) {
             return new Promise(resolve => setTimeout(resolve, ms));
