@@ -61,6 +61,22 @@
         #typewrite {
             font-size: 25px;
         }
+        #ending-card {
+            background: #0f0f0f;
+            color: #ffffff;
+            padding: 4px 4px;
+            border-radius: 8px;
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            text-align: left;
+        }
+        #ending-name {
+            font-size: 25px;
+        }
+        #ending-collected {
+            color: grey;
+        }
     </style>
 </head>
 <body>
@@ -73,11 +89,18 @@
         <button id="odd" class="item select-button" style="display: none;">Odd</button>
         <button id="even" class="item select-button" style="display: none;">Even</button>
     </div>
+    <div id="ending-card" style="display: none">
+        <img src="assets/trophy-solid-full.svg" width="32px" height="32px"></img>
+        <span id="ending-name">Example Ending</span><br>
+        <span id="ending-description">A test ending...</span><br>
+        <span id="ending-collected">X / Y Endings Collected</span>
+    </div>
     <script>
         const rolldie = document.getElementById("roll_die");
         const click_anywhere = document.getElementById("click-anywhere");
         var ran_mult = 1;
         var isSecondTime = false;
+        var endings_collected = 0;
         click_anywhere.addEventListener("click", () => {
             document.getElementById("click-anywhere-text").classList.add("fade-out");
             setTimeout(async () => {
@@ -109,7 +132,7 @@
                 rolldie.addEventListener("click", async () => {
                     if (hasClicked) return;
                     hasClicked = true;
-                    const ran = Math.floor(Math.random() * 21) * ran_mult; // TODO: can't be 0
+                    const ran = (Math.floor(Math.random() * 20) + 1) * ran_mult;
                     rolldie.classList.remove("fade-in");
                     rolldie.classList.add("fade-out");
                     typewrite("You rolled a...");
@@ -132,9 +155,7 @@
                         typewrite(".. " + ran + " .. somehow higher than 20.. hmm..");
                     }
                     await sleep(5000);
-                    console.log(isSecondTime);
                     if (isSecondTime == false) {
-                        console.log("triggered");
                         if (ran < 18) {
                             typewrite(".. but not good enough.");
                             await sleep(6000);
@@ -149,6 +170,11 @@
                             typewrite("Well done.");
                             await sleep(3500);
                             typewrite("Since you have proved to me that you are capable, I'll let you proceed.");
+                            if (ran > 20) {
+                                doEnding("cheater");
+                            } else {
+                                doEnding("luck");
+                            }
                             await sleep(8000);
                             window.location.href = "https://isle.a.hackclub.dev/scenes/79";
                         }
@@ -164,11 +190,15 @@
                             document.getElementById("even").style.display = "block";
                             document.getElementById("odd").classList.add("fade-in");
                             document.getElementById("even").classList.add("fade-in");
-                            //rolldie.classList.add("fade-out");
                         } else if (ran >= 18) {
                             typewrite("For your second try, well done.");
                             await sleep(3500);
                             typewrite("Since you have proved to me that you are capable, I'll let you proceed.");
+                            if (ran > 20) {
+                                doEnding("cheater");
+                            } else {
+                                doEnding("luck");
+                            }
                             await sleep(8000);
                             window.location.href = "https://isle.a.hackclub.dev/scenes/79";
                         }
@@ -193,7 +223,7 @@
                 typewrite("You chose Even... time to roll.");
                 await sleep(3000);
             }
-            const ran = Math.floor(Math.random() * 7) * ran_mult; // TODO: can't be 0
+            const ran = (Math.floor(Math.random() * 6) + 1) * ran_mult;
             typewrite("The D6 rolled..");
             await sleep(2000);
             var success = false;
@@ -222,11 +252,25 @@
                 typewrite("No more chances. I'm afraid I'll have to send you back.");
                 await sleep(3500);
                 typewrite("I'm going to roll another D6. This determines what neighbor you'll end up on.");
+                await sleep(5000);
+                typewrite("Odds is The Great Wall, even is Block of Ice.");
                 await sleep(3500);
                 typewrite("I rolled..");
-                await sleep(3500);
-                const ran = Math.floor(Math.random() * 7) * ran_mult; // TODO: can't be 0
-                typewrite(".. " + ran + " ..");
+                const ran = (Math.floor(Math.random() * 6) + 1) * ran_mult; // TODO: can't be 0
+                await sleep(2500);
+                if (Math.abs(ran % 2) == 1) { // odd https://stackoverflow.com/a/6211660
+                    typewrite(".. " + ran + ".. an odd.");
+                    await sleep(2500);
+                    typewrite("Thanks for playing my game.");
+                    await sleep(3000);
+                    window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                } else if (ran % 2 == 0) { // even https://stackoverflow.com/a/6211660
+                    typewrite(".. " + ran + ".. an even.");
+                    await sleep(2500);
+                    typewrite("Thanks for playing my game.");
+                    await sleep(3000);
+                    window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                }
             }
         }
         /* https://www.sitepoint.com/delay-sleep-pause-wait/ */
@@ -246,6 +290,19 @@
         function letMePass() {
             ran_mult = 9000;
             console.log("sure thing..");
+        }
+        function doEnding(ending) {
+            document.getElementById("ending-card").style.display = "block";
+            endings_collected += 1;
+            if (ending == "cheater") {
+                document.getElementById("ending-name").textContent = "Cheater Ending";
+                document.getElementById("ending-description").textContent = "You know what you did...";
+                document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
+            } else if (ending == "luck") {
+                document.getElementById("ending-name").textContent = "Lucky Ending";
+                document.getElementById("ending-description").textContent = "How did you do it?";
+                document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
+            }
         }
     </script>
 </body>
