@@ -21,11 +21,23 @@
             align-items: center;
             user-select: none;
         }
+        #container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 60vh;
+            width: 100%;
+        }
         .select-button {
             display: none;
             color: #ffffff;
             background-color: black;
             padding: 16px 16px;
+            opacity: 0;
+            transition: opacity 1s;
+            pointer-events: none;
+            margin: 10px 0;
         }
         #click-anywhere {
             position: fixed;
@@ -51,11 +63,14 @@
             transition: 1s;
         }
         .select-button.fade-in {
+            display: block;
             opacity: 1;
+            pointer-events: auto;
             transition: 1s;
         }
         .select-button.fade-out {
             opacity: 0;
+            pointer-events: auto;
             transition: 1s;
         }
         #typewrite {
@@ -78,6 +93,7 @@
             color: grey;
         }
     </style>
+    <script src="assets/jquery.min.js"></script>
 </head>
 <body>
     <div id="click-anywhere"><span id="click-anywhere-text">Click anywhere</span></div>
@@ -86,6 +102,7 @@
         <button id="roll_die" class="item select-button">roll the d20..</button>
         <p id="rolled"></p>
         <audio id="main-ambience" src="assets/assets_sounds_orch_hit_new.mp3" preload="auto" loop></audio>
+        <audio id="ending-popup-sound" src="assets/ending.mp3" preload="auto"></audio>
         <button id="odd" class="item select-button" style="display: none;">Odd</button>
         <button id="even" class="item select-button" style="display: none;">Even</button>
     </div>
@@ -166,6 +183,8 @@
                             var hasClicked = false;
                             isSecondTime = true
                             rolldie.style.display = "block";
+                            rolldie.classList.remove("fade-out");
+                            rolldie.classList.add("fade-in");
                         } else if (ran >= 18) {
                             typewrite("Well done.");
                             await sleep(3500);
@@ -176,7 +195,7 @@
                                 doEnding("luck");
                             }
                             await sleep(8000);
-                            window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                            window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/79";
                         }
                     } else if (isSecondTime == true) {
                         if (ran < 18) {
@@ -184,8 +203,6 @@
                             await sleep(6500);
                             typewrite("Let's make this 50/50. Odd or even?");
                             await sleep(4000);
-                            document.getElementById("odd").style.opacity = 1;
-                            document.getElementById("even").style.opacity = 1;
                             document.getElementById("odd").style.display = "block";
                             document.getElementById("even").style.display = "block";
                             document.getElementById("odd").classList.add("fade-in");
@@ -200,7 +217,7 @@
                                 doEnding("luck");
                             }
                             await sleep(8000);
-                            window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                            window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/79";
                         }
                     }
                 })
@@ -214,62 +231,79 @@
             if (!hasChosenSelection) finalMainPhase("even");
         })
         async function finalMainPhase(selection) {
+            hasChosenSelection = true;
+            document.getElementById("odd").classList.remove("fade-in");
+            document.getElementById("even").classList.remove("fade-in");
+            document.getElementById("odd").classList.add("fade-out");
+            document.getElementById("even").classList.add("fade-out");
             if (selection == "odd") {
                 await sleep(1000);
                 typewrite("You chose Odd... time to roll.");
-                await sleep(3000);
+                await sleep(4000);
             } else if (selection == "even") {
                 await sleep(1000);
                 typewrite("You chose Even... time to roll.");
-                await sleep(3000);
+                await sleep(4000);
             }
+            await sleep(1000);
+            document.getElementById("odd").style.display = "none";
+            document.getElementById("even").style.display = "none";
             const ran = (Math.floor(Math.random() * 6) + 1) * ran_mult;
             typewrite("The D6 rolled..");
-            await sleep(2000);
+            await sleep(3000);
             var success = false;
-            if (Math.abs(ran % 2) == 1) { // odd https://stackoverflow.com/a/6211660
+            console.log(ran);
+            console.log("odd check: " + (Math.abs(ran % 2) == 1));
+            console.log("even check: " + (ran % 2 == 0));
+            if ((Math.abs(ran % 2)) == 1) { // odd https://stackoverflow.com/a/6211660
                 if (selection == "odd") {
                     success = true;
                     typewrite(".. " + ran + ".. indeed an odd.");
                 } else if (selection == "even") {
                     success = false;
-                    typewrite(".. " + ran + ".. an even.");
+                    typewrite(".. " + ran + ".. an odd.");
                 }
-            } else if (ran % 2 == 0) { // even https://stackoverflow.com/a/6211660
+            } else if ((ran % 2) == 0) { // even https://stackoverflow.com/a/6211660
                 if (selection == "odd") {
                     success = false;
-                    typewrite(".. " + ran + ".. an odd.");
+                    typewrite(".. " + ran + ".. an even.");
                 } else if (selection == "even") {
                     success = true;
                     typewrite(".. " + ran + ".. indeed an even.");
                 }
             }
+            await sleep(5000);
             if (success) {
                 typewrite("Well done.");
+                doEnding("determination");
+                await sleep(4000);
+                window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/79";
             } else {
                 typewrite("It hasn't been going so well, has it?");
-                await sleep(3500);
+                await sleep(4500);
                 typewrite("No more chances. I'm afraid I'll have to send you back.");
-                await sleep(3500);
+                await sleep(4500);
                 typewrite("I'm going to roll another D6. This determines what neighbor you'll end up on.");
-                await sleep(5000);
-                typewrite("Odds is The Great Wall, even is Block of Ice.");
-                await sleep(3500);
+                await sleep(6000);
+                typewrite("Odds is 73, even is 56.");
+                await sleep(4500);
                 typewrite("I rolled..");
                 const ran = (Math.floor(Math.random() * 6) + 1) * ran_mult; // TODO: can't be 0
                 await sleep(2500);
                 if (Math.abs(ran % 2) == 1) { // odd https://stackoverflow.com/a/6211660
                     typewrite(".. " + ran + ".. an odd.");
-                    await sleep(2500);
+                    await sleep(3500);
+                    doEnding("attempt");
                     typewrite("Thanks for playing my game.");
                     await sleep(3000);
-                    window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                    window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/73";
                 } else if (ran % 2 == 0) { // even https://stackoverflow.com/a/6211660
                     typewrite(".. " + ran + ".. an even.");
-                    await sleep(2500);
+                    await sleep(3500);
+                    doEnding("attempt");
                     typewrite("Thanks for playing my game.");
                     await sleep(3000);
-                    window.location.href = "https://isle.a.hackclub.dev/scenes/79";
+                    window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/56";
                 }
             }
         }
@@ -294,6 +328,8 @@
         function doEnding(ending) {
             document.getElementById("ending-card").style.display = "block";
             endings_collected += 1;
+            playPause(false);
+            document.getElementById("ending-popup-sound").play();
             if (ending == "cheater") {
                 document.getElementById("ending-name").textContent = "Cheater Ending";
                 document.getElementById("ending-description").textContent = "You know what you did...";
@@ -302,6 +338,34 @@
                 document.getElementById("ending-name").textContent = "Lucky Ending";
                 document.getElementById("ending-description").textContent = "How did you do it?";
                 document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
+            } else if (ending == "determination") {
+                document.getElementById("ending-name").textContent = "Determination Ending";
+                document.getElementById("ending-description").textContent = "Something to not give up on!";
+                document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
+            } else if (ending == "attempt") {
+                document.getElementById("ending-name").textContent = "Attempted Ending";
+                document.getElementById("ending-description").textContent = "Not bad! Keep going, maybe you'll find something..";
+                document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
+            }
+        }
+        /* https://stackoverflow.com/a/64521347 */
+        function playPause(playing) {
+            const song = document.querySelector('#main-ambience');
+            if (playing) {
+                //relevant part to fading in audio
+                song.volume = 0;
+                $('#main-ambience').animate({volume: 1.0}, 1000);
+                song.play();
+
+                playing = false;
+            } else {
+                //relevant part to fading out audio
+                song.volume = 1;
+                $('#main-ambience').animate({volume: 0.5}, 1000, function() {
+                    song.pause();
+                });
+
+                playing = true;
             }
         }
     </script>
