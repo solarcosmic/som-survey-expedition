@@ -139,6 +139,20 @@
             margin-right: 8px;
             color: red;
         }
+        /* https://stackoverflow.com/a/20910008 */
+        /* https://www.impressivewebs.com/animate-display-block-none/ */
+        .visible {
+            display: block;
+            opacity: 1;
+            transition: opacity 0.5s;
+        }
+        .visuallyhidden {
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .hidden {
+            display: none;
+        }
     </style>
     <script src="assets/jquery.min.js"></script>
 </head>
@@ -158,17 +172,12 @@
         <p id="rolled"></p>
         <audio id="main-ambience" src="assets/assets_sounds_orch_hit_new.mp3" preload="auto" loop></audio>
         <audio id="ending-popup-sound" src="assets/ending.mp3" preload="auto"></audio>
+        <audio id="true-ending-sound" src="assets/true_ending.mp3" preload="auto"></audio>
         <button id="odd" class="item select-button" style="display: none;">Odd</button>
         <button id="even" class="item select-button" style="display: none;">Even</button>
-        <div id="prompt">
-            <div class="option-selection">
-                <span id="heart">➤</span>
-                Roll D20
-            </div>
-            <div class="option-selection">
-                Flee
-            </div>
-        </div>
+        <span id="heart" class="hidden visibilityhidden">➤</span>
+        <div id="prompt"></div>
+        <p style="color: grey;" id="navigate-tip">Use the arrow keys to navigate, then press Enter.</p>
     </div>
     <div id="ending-card" style="display: none">
         <img src="assets/trophy-solid-full.svg" width="24px" height="24px"></img>
@@ -205,6 +214,13 @@
         };
         var nav = 1;
         var total_navigator = 2;
+        var isInNavigator = false;
+        var stage = 0;
+        /*
+        All Stages:
+        0: Intro
+        1: Roll D20 (First Instance)
+        */
         document.addEventListener("keydown", (e) => {
             const key = e.key;
             if (key == "ArrowDown") {
@@ -213,16 +229,25 @@
                     updateNavigator(nav + 1);
                     console.log(nav);
                 }
-            } else {
-                if (key == "ArrowUp") {
-                    if ((nav + 1) > total_navigator) {
-                        console.log("deapproved!");
-                        updateNavigator(nav - 1);
-                        console.log(nav);
-                    }
+            } else if (key == "ArrowUp") {
+                if ((nav + 1) > total_navigator) {
+                    console.log("deapproved!");
+                    updateNavigator(nav - 1);
+                    console.log(nav);
                 }
+            } else if (key == "Enter") {
+                if (!isInNavigator) return;
+                const item = getItemOnNavigator();
+                fadeOut(document.getElementById("prompt"));
+                fadeOut(document.getElementById("navigate-tip"));
+                document.dispatchEvent(new Event("navigatoraccept"));
             }
         });
+        function getItemOnNavigator() {
+            if (!isInNavigator) return "";
+            const heart = document.getElementById("heart");
+            return heart.parentNode.innerHTML.replace(`<span id="heart">➤</span>`, "").trim();
+        }
         function updateNavigator(val) {
             nav = val;
             const len = document.getElementById("prompt").childElementCount;
@@ -234,6 +259,38 @@
                 item.prepend(document.getElementById("heart"));
             }
         }
+        function createPromptItems(items) {
+            document.getElementById("prompt").innerHTML = "";
+            for (const item of items) {
+                const elm = document.createElement("div");
+                elm.classList.add("option-selection");
+                elm.textContent = item;
+                document.getElementById("prompt").appendChild(elm);
+            }
+        }
+
+        function addHeartPointer(item) {
+            const heart = document.getElementById("heart");
+            const prompt = document.getElementById("prompt");
+            var fullItem = null;
+            for (const maybeItem of prompt.children) {
+                console.log(maybeItem);
+                var text = maybeItem.innerHTML.replace(`<span id="heart">➤</span>`, "").trim();
+                console.log(text);
+                if (text == item) {
+                    console.log("fullItem!");
+                    fullItem = maybeItem;
+                    break;
+                }
+            }
+            if (!fullItem) return console.log("Failed to retrieve item");
+            fullItem.prepend(heart);
+            heart.classList.remove("hidden", "visuallyhidden");
+        }
+        //fadeOut(document.getElementById("prompt"));
+        //fadeOut(document.getElementById("navigate-tip"));
+        document.getElementById("prompt").classList.add("hidden", "visuallyhidden");
+        document.getElementById("navigate-tip").classList.add("hidden", "visuallyhidden");
         click_anywhere.addEventListener("click", () => {
             document.getElementById("click-anywhere-text").classList.add("fade-out");
             document.getElementById("ending-list").classList.add("fade-out");
@@ -258,13 +315,20 @@
                 await sleep(5000);
                 typewrite("That's brilliant, but you have a choice to make.");
                 await sleep(7000);
-                typewrite("Click the button to roll a D20, and let's see what you get.");
-                await sleep(7000);
-                rolldie.style.display = "block";
-                rolldie.classList.remove("fade-out");
-                rolldie.classList.add("fade-in");
+                typewrite("Roll a D20, and let's see what you get.");
+                await sleep(5000);
+                //rolldie.style.display = "block";
+                //rolldie.classList.remove("fade-out");
+                //rolldie.classList.add("fade-in");
                 var hasClicked = false;
-                rolldie.addEventListener("click", async () => {
+                isInNavigator = true;
+                stage += 1;
+                createPromptItems(["Roll D20"]);
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+                document.addEventListener("navigatoraccept", async () => {
+                    console.log("navigator accept! stage: " + stage);
                     if (hasClicked) return;
                     hasClicked = true;
                     const ran = (Math.floor(Math.random() * 20) + 1) * ran_mult;
@@ -300,9 +364,10 @@
                             await sleep(5000);
                             var hasClicked = false;
                             isSecondTime = true
-                            rolldie.style.display = "block";
-                            rolldie.classList.remove("fade-out");
-                            rolldie.classList.add("fade-in");
+                            createPromptItems(["Roll D20", "Flee"]);
+                            addHeartPointer("Roll D20");
+                            fadeIn(document.getElementById("prompt"));
+                            fadeIn(document.getElementById("navigate-tip"));
                         } else if (ran >= 18) {
                             typewrite("Well done.");
                             await sleep(3500);
@@ -507,6 +572,21 @@
                 document.getElementById("ending-list").appendChild(trophy);
             }
             //if (hasEnding())
+        }
+        function fadeIn(el) {
+            el.classList.remove('hidden');
+            el.classList.add('visible');
+            void el.offsetWidth;
+            el.classList.remove('visuallyhidden');
+        }
+
+        function fadeOut(el) {
+            el.classList.add('visuallyhidden');
+            el.addEventListener('transitionend', function handler() {
+                el.classList.remove('visible');
+                el.classList.add('hidden');
+                el.removeEventListener('transitionend', handler);
+            });
         }
         loadEndings();
     </script>
