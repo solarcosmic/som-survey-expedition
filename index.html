@@ -170,12 +170,11 @@
         <span id="typewrite"></span>
         <button id="roll_die" class="item select-button">roll the d20..</button>
         <p id="rolled"></p>
-        <audio id="main-ambience" src="assets/assets_sounds_orch_hit_new.mp3" preload="auto" loop></audio>
+        <audio id="main-ambience" src="assets/orch_hit_ice.mp3" volume="0.5" preload="auto" loop></audio>
         <audio id="ending-popup-sound" src="assets/ending.mp3" preload="auto"></audio>
         <audio id="true-ending-sound" src="assets/true_ending.mp3" preload="auto"></audio>
         <button id="odd" class="item select-button" style="display: none;">Odd</button>
         <button id="even" class="item select-button" style="display: none;">Even</button>
-        <span id="heart" class="hidden visibilityhidden">➤</span>
         <div id="prompt"></div>
         <p style="color: grey;" id="navigate-tip">Use the arrow keys to navigate, then press Enter.</p>
     </div>
@@ -195,7 +194,7 @@
                 "name": "Cheater Ending",
                 "description": "You know what you did..."
             },
-            "lucky": {
+            "luck": {
                 "name": "Lucky Ending",
                 "description": "How did you do it?"
             },
@@ -287,14 +286,31 @@
             fullItem.prepend(heart);
             heart.classList.remove("hidden", "visuallyhidden");
         }
+        function restoreHeart() {
+            if (!document.getElementById("heart")) {
+                const heart = document.createElement("span");
+                heart.setAttribute("id", "heart");
+                heart.classList.add("hidden", "visibilityhidden");
+                heart.textContent = "➤";
+                document.body.appendChild(heart);
+            }
+        }
+
+        function hasAllEndingsExceptTrue() {
+            for (const item in endings) {
+                if (item != "true" && hasEnding(item)) continue;
+                if (item != "true" && !hasEnding(item)) return false;
+                if (item == "true") return true;
+            }
+        }
         //fadeOut(document.getElementById("prompt"));
         //fadeOut(document.getElementById("navigate-tip"));
         document.getElementById("prompt").classList.add("hidden", "visuallyhidden");
         document.getElementById("navigate-tip").classList.add("hidden", "visuallyhidden");
         click_anywhere.addEventListener("click", () => {
             document.getElementById("click-anywhere-text").classList.add("fade-out");
-            document.getElementById("ending-list").classList.add("fade-out");
-            document.getElementById("credits-text").classList.add("fade-out");
+            fadeOut(document.getElementById("ending-list"));
+            fadeOut(document.getElementById("credits-text"));
             setTimeout(async () => {
                 click_anywhere.style.display = "none";
                 document.getElementById("main-ambience").play();
@@ -324,6 +340,7 @@
                 isInNavigator = true;
                 stage += 1;
                 createPromptItems(["Roll D20"]);
+                restoreHeart();
                 addHeartPointer("Roll D20");
                 fadeIn(document.getElementById("prompt"));
                 fadeIn(document.getElementById("navigate-tip"));
@@ -331,6 +348,12 @@
                     console.log("navigator accept! stage: " + stage);
                     if (hasClicked) return;
                     hasClicked = true;
+                    console.log("navigator: " + getItemOnNavigator());
+                    console.log(hasAllEndingsExceptTrue());
+                    if (hasAllEndingsExceptTrue() && (getItemOnNavigator().includes("Flee") || getItemOnNavigator().includes("Yes"))) {
+                        doTrueEnding();
+                        return;
+                    }
                     const ran = (Math.floor(Math.random() * 20) + 1) * ran_mult;
                     rolldie.classList.remove("fade-in");
                     rolldie.classList.add("fade-out");
@@ -355,7 +378,7 @@
                     }
                     await sleep(5000);
                     if (isSecondTime == false) {
-                        if (ran < 18) {
+                        if (ran < 16) {
                             typewrite(".. but not good enough.");
                             await sleep(6000);
                             typewrite("I'll let you reroll again, but on one condition.");
@@ -364,11 +387,16 @@
                             await sleep(5000);
                             var hasClicked = false;
                             isSecondTime = true
-                            createPromptItems(["Roll D20", "Flee"]);
+                            if (hasAllEndingsExceptTrue()) {
+                                createPromptItems(["Roll D20", "Flee"]);
+                            } else {
+                                createPromptItems(["Roll D20"]);
+                            }
+                            restoreHeart();
                             addHeartPointer("Roll D20");
                             fadeIn(document.getElementById("prompt"));
                             fadeIn(document.getElementById("navigate-tip"));
-                        } else if (ran >= 18) {
+                        } else if (ran >= 16) {
                             typewrite("Well done.");
                             await sleep(3500);
                             typewrite("Since you have proved to me that you are capable, I'll let you proceed.");
@@ -381,7 +409,7 @@
                             window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/79";
                         }
                     } else if (isSecondTime == true) {
-                        if (ran < 18) {
+                        if (ran < 16) {
                             typewrite("Since you have not proved to me you are capable, I'll roll a D6.");
                             await sleep(6500);
                             typewrite("Let's make this 50/50. Odd or even?");
@@ -390,7 +418,7 @@
                             document.getElementById("even").style.display = "block";
                             document.getElementById("odd").classList.add("fade-in");
                             document.getElementById("even").classList.add("fade-in");
-                        } else if (ran >= 18) {
+                        } else if (ran >= 16) {
                             typewrite("For your second try, well done.");
                             await sleep(3500);
                             typewrite("Since you have proved to me that you are capable, I'll let you proceed.");
@@ -509,7 +537,6 @@
             console.log("sure thing..");
         }
         function doEnding(ending) {
-            document.getElementById("ending-card").style.display = "block";
             playPause(false);
             document.getElementById("ending-popup-sound").play();
             for (const item in endings) {
@@ -518,9 +545,10 @@
                     document.getElementById("ending-name").textContent = endings[item].name;
                     document.getElementById("ending-description").textContent = endings[item].description;
                     document.getElementById("ending-collected").textContent = Object.keys(JSON.parse(localStorage.getItem("spanky_endings_collected"))).length + " / 5 Endings Collected";
+                    document.getElementById("ending-card").style.display = "block";
+                    break;
                 }
             }
-            saveEnding(ending);
         }
         /* https://stackoverflow.com/a/64521347 */
         function playPause(playing) {
@@ -535,7 +563,7 @@
             } else {
                 //relevant part to fading out audio
                 song.volume = 1;
-                $('#main-ambience').animate({volume: 0.5}, 1000, function() {
+                $('#main-ambience').animate({volume: 0}, 1000, function() {
                     song.pause();
                 });
 
@@ -587,6 +615,118 @@
                 el.classList.add('hidden');
                 el.removeEventListener('transitionend', handler);
             });
+        }
+
+        var true_ending_stage = 0;
+        async function doTrueEnding() {
+            if (true_ending_stage == 0) {
+                typewrite("Wait, what?");
+                await sleep(3500);
+                typewrite("You want to leave?");
+                await sleep(4500);
+                true_ending_stage += 1;
+                createPromptItems(["Roll D20", "Flee"]);
+                restoreHeart();
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+            } else if (true_ending_stage == 1) {
+                typewrite("No, you have to stay..");
+                await sleep(4500);
+                typewrite("You CAN'T LEAVE!");
+                await sleep(4500);
+                true_ending_stage += 1;
+                createPromptItems(["Roll D20", "Flee"]);
+                restoreHeart();
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+            } else if (true_ending_stage == 2) {
+                typewrite("..");
+                await sleep(2000);
+                true_ending_stage += 1;
+                createPromptItems(["Roll D20", "Flee"]);
+                restoreHeart();
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+            } else if (true_ending_stage == 3) {
+                typewrite("..");
+                await sleep(2000);
+                true_ending_stage += 1;
+                createPromptItems(["Roll D20", "Flee"]);
+                restoreHeart();
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+            } else if (true_ending_stage == 4) {
+                typewrite(".");
+                await sleep(2000);
+                true_ending_stage += 1;
+                createPromptItems(["Roll D20", "Flee"]);
+                restoreHeart();
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+            } else if (true_ending_stage == 5) {
+                typewrite(".. do I mean anything to you?");
+                await sleep(3500);
+                true_ending_stage += 1;
+                createPromptItems(["Roll D20", "Yes"]);
+                restoreHeart();
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+            } else if (true_ending_stage == 6) {
+                typewrite(".. wait, really?");
+                await sleep(3500);
+                typewrite("So I'm not just a mysterious figure?");
+                await sleep(4500);
+                true_ending_stage += 1;
+                createPromptItems(["Roll D20", "Yes"]);
+                restoreHeart();
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+            } else if (true_ending_stage == 7) {
+                playPause(false);
+                typewrite(".. wait, this means..");
+                await sleep(1500);
+                document.getElementById("true-ending-sound").play();
+                await sleep(1500);
+                typewrite(".. I mean something..");
+                await sleep(2000);
+                typewrite("I MEAN SOMETHING!");
+                await sleep(2500);
+                typewrite("Thank you for helping me find my purpose!");
+                await sleep(4000);
+                typewrite("All my life, I thought I was nobody..");
+                await sleep(4000);
+                typewrite("A figure waiting to depart from this place..");
+                await sleep(4500);
+                typewrite("Then you came along.");
+                await sleep(2500);
+                typewrite("I remember the day that you were first here.");
+                await sleep(4500);
+                typewrite("It's a vivid memory, and I don't want it to go away..");
+                await sleep(5500);
+                typewrite("So thank you, friend.");
+                await sleep(2500);
+                typewrite("I MEAN- thank you.");
+                await sleep(2500);
+                typewrite("I can finally depart in peace now.");
+                await sleep(3500);
+                typewrite(".. thank you, THANK YOU!");
+                await sleep(3500);
+                typewrite("True Ending");
+                await sleep(3500);
+                true_ending_stage += 1;
+                createPromptItems(["Roll D20", "Yes"]);
+                restoreHeart();
+                addHeartPointer("Roll D20");
+                fadeIn(document.getElementById("prompt"));
+                fadeIn(document.getElementById("navigate-tip"));
+            }
         }
         loadEndings();
     </script>
