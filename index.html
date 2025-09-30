@@ -21,6 +21,10 @@
             align-items: center;
             user-select: none;
         }
+        body.light {
+            background-color: white;
+            color: black;
+        }
         #container {
             display: flex;
             flex-direction: column;
@@ -703,13 +707,15 @@
                 typewrite("All my life, I thought I was nobody..");
                 await sleep(4000);
                 typewrite("A figure waiting to depart from this place..");
-                await sleep(4500);
+                await sleep(5500);
+                document.body.classList.toggle("light");
                 typewrite("Then you came along.");
                 await sleep(2500);
                 typewrite("I remember the day that you were first here.");
                 await sleep(4500);
                 typewrite("It's a vivid memory, and I don't want it to go away..");
                 await sleep(5500);
+                document.body.classList.toggle("light");
                 typewrite("So thank you, friend.");
                 await sleep(2500);
                 typewrite("I MEAN- thank you.");
