@@ -92,11 +92,34 @@
         #ending-collected {
             color: grey;
         }
+        #ending-list {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: grey;
+            font-size: 20px;
+        }
+        #collected-endings-text {
+            position: absolute;
+            top: 3.5px;
+            right: 145px;
+            color: grey;
+            font-size: 20px;
+            width: 300px;
+        }
+        .greyed-out {
+            filter: invert(55%) sepia(1%) saturate(0%) hue-rotate(320deg) brightness(91%) contrast(85%);
+        }
     </style>
     <script src="assets/jquery.min.js"></script>
 </head>
 <body>
-    <div id="click-anywhere"><span id="click-anywhere-text">Click anywhere</span></div>
+    <div id="click-anywhere">
+        <span id="click-anywhere-text">Click anywhere</span>
+        <span id="ending-list">
+            <span id="collected-endings-text">Collected endings (1/5)</span>
+        </span>
+    </div>
     <div id="container">
         <span id="typewrite"></span>
         <button id="roll_die" class="item select-button">roll the d20..</button>
@@ -107,7 +130,7 @@
         <button id="even" class="item select-button" style="display: none;">Even</button>
     </div>
     <div id="ending-card" style="display: none">
-        <img src="assets/trophy-solid-full.svg" width="32px" height="32px"></img>
+        <img src="assets/trophy-solid-full.svg" width="24px" height="24px"></img>
         <span id="ending-name">Example Ending</span><br>
         <span id="ending-description">A test ending...</span><br>
         <span id="ending-collected">X / Y Endings Collected</span>
@@ -117,7 +140,28 @@
         const click_anywhere = document.getElementById("click-anywhere");
         var ran_mult = 1;
         var isSecondTime = false;
-        var endings_collected = 0;
+        const endings = {
+            "cheater": {
+                "name": "Cheater Ending",
+                "description": "You know what you did..."
+            },
+            "lucky": {
+                "name": "Lucky Ending",
+                "description": "How did you do it?"
+            },
+            "determination": {
+                "name": "Determination Ending",
+                "description": "Something to not give up on!"
+            },
+            "attempted": {
+                "name": "Attempted Ending",
+                "description": "Worth a shot! Try again, perhaps?"
+            },
+            "true": {
+                "name": "True Ending",
+                "description": "One for all."
+            },
+        };
         click_anywhere.addEventListener("click", () => {
             document.getElementById("click-anywhere-text").classList.add("fade-out");
             setTimeout(async () => {
@@ -327,26 +371,17 @@
         }
         function doEnding(ending) {
             document.getElementById("ending-card").style.display = "block";
-            endings_collected += 1;
             playPause(false);
             document.getElementById("ending-popup-sound").play();
-            if (ending == "cheater") {
-                document.getElementById("ending-name").textContent = "Cheater Ending";
-                document.getElementById("ending-description").textContent = "You know what you did...";
-                document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
-            } else if (ending == "luck") {
-                document.getElementById("ending-name").textContent = "Lucky Ending";
-                document.getElementById("ending-description").textContent = "How did you do it?";
-                document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
-            } else if (ending == "determination") {
-                document.getElementById("ending-name").textContent = "Determination Ending";
-                document.getElementById("ending-description").textContent = "Something to not give up on!";
-                document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
-            } else if (ending == "attempt") {
-                document.getElementById("ending-name").textContent = "Attempted Ending";
-                document.getElementById("ending-description").textContent = "Not bad! Keep going, maybe you'll find something..";
-                document.getElementById("ending-collected").textContent = endings_collected + " / 5 Endings Collected";
+            for (const item in endings) {
+                if (item == ending) {
+                    saveEnding(ending);
+                    document.getElementById("ending-name").textContent = endings[item].name;
+                    document.getElementById("ending-description").textContent = endings[item].description;
+                    document.getElementById("ending-collected").textContent = Object.keys(JSON.parse(localStorage.getItem("spanky_endings_collected"))).length + " / 5 Endings Collected";
+                }
             }
+            saveEnding(ending);
         }
         /* https://stackoverflow.com/a/64521347 */
         function playPause(playing) {
@@ -368,6 +403,38 @@
                 playing = true;
             }
         }
+        function saveEnding(ending) {
+            var endings = localStorage.getItem("spanky_endings_collected");
+            if (!endings) {
+                localStorage.setItem("spanky_endings_collected", JSON.stringify({}));
+                endings = localStorage.getItem("spanky_endings_collected");
+            }
+            var items = JSON.parse(localStorage.getItem("spanky_endings_collected"));
+            items[ending] = true
+            localStorage.setItem("spanky_endings_collected", JSON.stringify(items));
+        }
+        function hasEnding(ending) {
+            const endingsStr = localStorage.getItem("spanky_endings_collected");
+            if (!endingsStr) return false;
+            const endings = JSON.parse(endingsStr);
+            if (endings[ending] === true) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        function loadEndings() {
+            for (const item in endings) {
+                const trophy = document.createElement("img");
+                trophy.src = "assets/trophy-solid-full.svg";
+                trophy.width = "32";
+                trophy.height = "32";
+                if (!hasEnding(item)) trophy.classList.add("greyed-out");
+                document.getElementById("ending-list").appendChild(trophy);
+            }
+            //if (hasEnding())
+        }
+        loadEndings();
     </script>
 </body>
 </html>
