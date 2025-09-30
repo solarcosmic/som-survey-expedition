@@ -101,14 +101,43 @@
         }
         #collected-endings-text {
             position: absolute;
-            top: 3.5px;
-            right: 145px;
+            top: -35px;
+            right: 540px;
             color: grey;
             font-size: 20px;
             width: 300px;
         }
         .greyed-out {
             filter: invert(55%) sepia(1%) saturate(0%) hue-rotate(320deg) brightness(91%) contrast(85%);
+        }
+        #credits-text {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: grey;
+            font-size: 20px;
+            text-align: left;
+        }
+        a {
+            color: #b1b1b1;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .option-selection {
+            font-size: 20px;
+            color: grey;
+            display: flex;
+            align-items: center;
+        }
+        #prompt {
+            text-align: left;
+        }
+        #heart {
+            margin-left: 0;
+            margin-right: 8px;
+            color: red;
         }
     </style>
     <script src="assets/jquery.min.js"></script>
@@ -117,7 +146,10 @@
     <div id="click-anywhere">
         <span id="click-anywhere-text">Click anywhere</span>
         <span id="ending-list">
-            <span id="collected-endings-text">Collected endings (1/5)</span>
+            <!--<span id="collected-endings-text">Collected endings (1/5)</span>-->
+        </span>
+        <span id="credits">
+            <span id="credits-text">Spanky's (c) 2025 solarcosmic<br>Made for the <a href="https://summer.hackclub.com/s">Summer of Making expedition</a>!</span>
         </span>
     </div>
     <div id="container">
@@ -128,6 +160,15 @@
         <audio id="ending-popup-sound" src="assets/ending.mp3" preload="auto"></audio>
         <button id="odd" class="item select-button" style="display: none;">Odd</button>
         <button id="even" class="item select-button" style="display: none;">Even</button>
+        <div id="prompt">
+            <div class="option-selection">
+                <span id="heart">➤</span>
+                Roll D20
+            </div>
+            <div class="option-selection">
+                Flee
+            </div>
+        </div>
     </div>
     <div id="ending-card" style="display: none">
         <img src="assets/trophy-solid-full.svg" width="24px" height="24px"></img>
@@ -162,8 +203,41 @@
                 "description": "One for all."
             },
         };
+        var nav = 1;
+        var total_navigator = 2;
+        document.addEventListener("keydown", (e) => {
+            const key = e.key;
+            if (key == "ArrowDown") {
+                if ((nav + 1) <= total_navigator) {
+                    console.log("approved!");
+                    updateNavigator(nav + 1);
+                    console.log(nav);
+                }
+            } else {
+                if (key == "ArrowUp") {
+                    if ((nav + 1) > total_navigator) {
+                        console.log("deapproved!");
+                        updateNavigator(nav - 1);
+                        console.log(nav);
+                    }
+                }
+            }
+        });
+        function updateNavigator(val) {
+            nav = val;
+            const len = document.getElementById("prompt").childElementCount;
+            if (nav <= len) {
+                console.log("works!");
+                const item = document.getElementsByClassName("option-selection")[nav - 1];
+                const detect = item.innerHTML.replace(`<span id="heart">➤</span>`, "").trim();
+                console.log(detect);
+                item.prepend(document.getElementById("heart"));
+            }
+        }
         click_anywhere.addEventListener("click", () => {
             document.getElementById("click-anywhere-text").classList.add("fade-out");
+            document.getElementById("ending-list").classList.add("fade-out");
+            document.getElementById("credits-text").classList.add("fade-out");
             setTimeout(async () => {
                 click_anywhere.style.display = "none";
                 document.getElementById("main-ambience").play();
