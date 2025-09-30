@@ -20,6 +20,7 @@
             justify-content: center;
             align-items: center;
             user-select: none;
+            transition: background-color 1s ease, color 1s ease;
         }
         body.light {
             background-color: white;
@@ -162,7 +163,7 @@
 </head>
 <body>
     <div id="click-anywhere">
-        <span id="click-anywhere-text">Click anywhere</span>
+        <span id="click-anywhere-text">Click anywhere<div id="fact" style="color: grey; font-size: 15px;">Hint: Collect 4 endings to unlock the True Ending (it's 100% worth it)!</div></span>
         <span id="ending-list">
             <!--<span id="collected-endings-text">Collected endings (1/5)</span>-->
         </span>
@@ -320,7 +321,7 @@
                 document.getElementById("main-ambience").play();
                 typewrite("Welcome to Spanky's...");
                 rolldie.classList.add("fade-out");
-                await sleep(5000);
+                await sleep(4000);
                 var hrs = new Date().getHours()
                 const isDayTime = hrs > 6 && hrs < 20 // https://stackoverflow.com/a/46908558
                 var timeOfDay = "right now?";
@@ -332,11 +333,11 @@
                     timeOfDay = "tonight?";
                 }
                 typewrite("Feeling hopeful " + timeOfDay);
-                await sleep(5000);
+                await sleep(3500);
                 typewrite("That's brilliant, but you have a choice to make.");
-                await sleep(7000);
+                await sleep(5500);
                 typewrite("Roll a D20, and let's see what you get.");
-                await sleep(5000);
+                await sleep(4000);
                 //rolldie.style.display = "block";
                 //rolldie.classList.remove("fade-out");
                 //rolldie.classList.add("fade-in");
@@ -349,6 +350,7 @@
                 fadeIn(document.getElementById("prompt"));
                 fadeIn(document.getElementById("navigate-tip"));
                 document.addEventListener("navigatoraccept", async () => {
+                    nav = 1;
                     console.log("navigator accept! stage: " + stage);
                     if (hasClicked) return;
                     hasClicked = true;
@@ -498,7 +500,7 @@
                 await sleep(4500);
                 typewrite("No more chances. I'm afraid I'll have to send you back.");
                 await sleep(4500);
-                typewrite("I'm going to roll another D6. This determines what neighbor you'll end up on.");
+                typewrite("I'm going to roll another D6. This determines wh6at neighbor you'll end up on.");
                 await sleep(6000);
                 typewrite("Odds is 73, even is 56.");
                 await sleep(4500);
@@ -724,16 +726,22 @@
                 await sleep(3500);
                 typewrite(".. thank you, THANK YOU!");
                 await sleep(3500);
-                typewrite("True Ending");
-                await sleep(3500);
-                true_ending_stage += 1;
-                createPromptItems(["Roll D20", "Yes"]);
-                restoreHeart();
-                addHeartPointer("Roll D20");
-                fadeIn(document.getElementById("prompt"));
-                fadeIn(document.getElementById("navigate-tip"));
+                doEnding("true");
+                fadeOut(document.getElementById("typewrite"));
+                await sleep(5000);
+                window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/79";
             }
         }
+        document.addEventListener("DOMContentLoaded", () => {
+            const ran = (Math.floor(Math.random() * 6) + 1);
+            if (ran <= 2) {
+                document.getElementById("fact").textContent = "Hint: Collect 4 endings to unlock the True Ending (it's 100% worth it)!";
+            } else if (ran > 2 && ran <= 4) {
+                document.getElementById("fact").textContent = "Fact: All music and sound effects were composed by me in LMMS!";
+            } else if (ran > 4 && ran <= 6) {
+                document.getElementById("fact").textContent = "Fact: The original idea was inspired by the Deltarune Chapter 1 opening scene!";
+            }
+        })
         loadEndings();
     </script>
 </body>
