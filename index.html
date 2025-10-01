@@ -178,8 +178,6 @@
         <audio id="main-ambience" src="assets/orch_hit_ice.mp3" volume="0.5" preload="auto" loop></audio>
         <audio id="ending-popup-sound" src="assets/ending.mp3" preload="auto"></audio>
         <audio id="true-ending-sound" src="assets/true_ending.mp3" preload="auto"></audio>
-        <button id="odd" class="item select-button" style="display: none;">Odd</button>
-        <button id="even" class="item select-button" style="display: none;">Even</button>
         <div id="prompt"></div>
         <p style="color: grey;" id="navigate-tip">Use the arrow keys to navigate, then press Enter.</p>
     </div>
@@ -224,20 +222,17 @@
         All Stages:
         0: Intro
         1: Roll D20 (First Instance)
+        .. i didn't end up using this system
         */
         document.addEventListener("keydown", (e) => {
             const key = e.key;
             if (key == "ArrowDown") {
                 if ((nav + 1) <= total_navigator) {
-                    console.log("approved!");
                     updateNavigator(nav + 1);
-                    console.log(nav);
                 }
             } else if (key == "ArrowUp") {
                 if ((nav + 1) > total_navigator) {
-                    console.log("deapproved!");
                     updateNavigator(nav - 1);
-                    console.log(nav);
                 }
             } else if (key == "Enter") {
                 if (!isInNavigator) return;
@@ -256,10 +251,8 @@
             nav = val;
             const len = document.getElementById("prompt").childElementCount;
             if (nav <= len) {
-                console.log("works!");
                 const item = document.getElementsByClassName("option-selection")[nav - 1];
                 const detect = item.innerHTML.replace(`<span id="heart">➤</span>`, "").trim();
-                console.log(detect);
                 item.prepend(document.getElementById("heart"));
             }
         }
@@ -278,11 +271,8 @@
             const prompt = document.getElementById("prompt");
             var fullItem = null;
             for (const maybeItem of prompt.children) {
-                console.log(maybeItem);
                 var text = maybeItem.innerHTML.replace(`<span id="heart">➤</span>`, "").trim();
-                console.log(text);
                 if (text == item) {
-                    console.log("fullItem!");
                     fullItem = maybeItem;
                     break;
                 }
@@ -308,8 +298,7 @@
                 if (item == "true") return true;
             }
         }
-        //fadeOut(document.getElementById("prompt"));
-        //fadeOut(document.getElementById("navigate-tip"));
+        var hasChosenSelection = false;
         document.getElementById("prompt").classList.add("hidden", "visuallyhidden");
         document.getElementById("navigate-tip").classList.add("hidden", "visuallyhidden");
         click_anywhere.addEventListener("click", () => {
@@ -335,29 +324,32 @@
                 typewrite("Feeling hopeful " + timeOfDay);
                 await sleep(3500);
                 typewrite("That's brilliant, but you have a choice to make.");
-                await sleep(5500);
+                await sleep(4500);
                 typewrite("Roll a D20, and let's see what you get.");
                 await sleep(4000);
-                //rolldie.style.display = "block";
-                //rolldie.classList.remove("fade-out");
-                //rolldie.classList.add("fade-in");
                 var hasClicked = false;
                 isInNavigator = true;
                 stage += 1;
+                // ======= what you need to do in order to prompt =======
                 createPromptItems(["Roll D20"]);
                 restoreHeart();
                 addHeartPointer("Roll D20");
                 fadeIn(document.getElementById("prompt"));
                 fadeIn(document.getElementById("navigate-tip"));
+                // ======= what you need to do in order to prompt =======
                 document.addEventListener("navigatoraccept", async () => {
                     nav = 1;
-                    console.log("navigator accept! stage: " + stage);
                     if (hasClicked) return;
                     hasClicked = true;
-                    console.log("navigator: " + getItemOnNavigator());
-                    console.log(hasAllEndingsExceptTrue());
                     if (hasAllEndingsExceptTrue() && (getItemOnNavigator().includes("Flee") || getItemOnNavigator().includes("Yes"))) {
                         doTrueEnding();
+                        return;
+                    }
+                    if (getItemOnNavigator().includes("Odd")) {
+                        if (!hasChosenSelection) finalMainPhase("odd");
+                        return;
+                    } else if (getItemOnNavigator().includes("Even")) {
+                        if (!hasChosenSelection) finalMainPhase("even");
                         return;
                     }
                     const ran = (Math.floor(Math.random() * 20) + 1) * ran_mult;
@@ -386,7 +378,7 @@
                     if (isSecondTime == false) {
                         if (ran < 16) {
                             typewrite(".. but not good enough.");
-                            await sleep(6000);
+                            await sleep(4000);
                             typewrite("I'll let you reroll again, but on one condition.");
                             await sleep(6000);
                             typewrite("Prove to me you are worthy of advancing.");
@@ -420,10 +412,11 @@
                             await sleep(6500);
                             typewrite("Let's make this 50/50. Odd or even?");
                             await sleep(4000);
-                            document.getElementById("odd").style.display = "block";
-                            document.getElementById("even").style.display = "block";
-                            document.getElementById("odd").classList.add("fade-in");
-                            document.getElementById("even").classList.add("fade-in");
+                            createPromptItems(["Odd", "Even"]);
+                            restoreHeart();
+                            addHeartPointer("Odd");
+                            fadeIn(document.getElementById("prompt"));
+                            fadeIn(document.getElementById("navigate-tip"));
                         } else if (ran >= 16) {
                             typewrite("For your second try, well done.");
                             await sleep(3500);
@@ -440,19 +433,8 @@
                 })
             }, 2000);
         });
-        var hasChosenSelection = false;
-        document.getElementById("odd").addEventListener("click", () => {
-            if (!hasChosenSelection) finalMainPhase("odd");
-        })
-        document.getElementById("even").addEventListener("click", () => {
-            if (!hasChosenSelection) finalMainPhase("even");
-        })
         async function finalMainPhase(selection) {
             hasChosenSelection = true;
-            document.getElementById("odd").classList.remove("fade-in");
-            document.getElementById("even").classList.remove("fade-in");
-            document.getElementById("odd").classList.add("fade-out");
-            document.getElementById("even").classList.add("fade-out");
             if (selection == "odd") {
                 await sleep(1000);
                 typewrite("You chose Odd... time to roll.");
@@ -463,15 +445,10 @@
                 await sleep(4000);
             }
             await sleep(1000);
-            document.getElementById("odd").style.display = "none";
-            document.getElementById("even").style.display = "none";
             const ran = (Math.floor(Math.random() * 6) + 1) * ran_mult;
             typewrite("The D6 rolled..");
             await sleep(3000);
             var success = false;
-            console.log(ran);
-            console.log("odd check: " + (Math.abs(ran % 2) == 1));
-            console.log("even check: " + (ran % 2 == 0));
             if ((Math.abs(ran % 2)) == 1) { // odd https://stackoverflow.com/a/6211660
                 if (selection == "odd") {
                     success = true;
@@ -502,7 +479,7 @@
                 await sleep(4500);
                 typewrite("I'm going to roll another D6. This determines wh6at neighbor you'll end up on.");
                 await sleep(6000);
-                typewrite("Odds is 73, even is 56.");
+                typewrite("Odds is Blubberhill, even is a snowdrift place.");
                 await sleep(4500);
                 typewrite("I rolled..");
                 const ran = (Math.floor(Math.random() * 6) + 1) * ran_mult; // TODO: can't be 0
@@ -513,14 +490,14 @@
                     doEnding("attempt");
                     typewrite("Thanks for playing my game.");
                     await sleep(3000);
-                    window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/73";
+                    window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/0";
                 } else if (ran % 2 == 0) { // even https://stackoverflow.com/a/6211660
                     typewrite(".. " + ran + ".. an even.");
                     await sleep(3500);
                     doEnding("attempt");
                     typewrite("Thanks for playing my game.");
                     await sleep(3000);
-                    window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/56";
+                    window.location.href = "https://vw4kks4wwkoswgks4k000gso.a.selfhosted.hackclub.com/scenes/69";
                 }
             }
         }
@@ -605,7 +582,6 @@
                 if (!hasEnding(item)) trophy.classList.add("greyed-out");
                 document.getElementById("ending-list").appendChild(trophy);
             }
-            //if (hasEnding())
         }
         function fadeIn(el) {
             el.classList.remove('hidden');
@@ -657,15 +633,6 @@
                 fadeIn(document.getElementById("prompt"));
                 fadeIn(document.getElementById("navigate-tip"));
             } else if (true_ending_stage == 3) {
-                typewrite("..");
-                await sleep(2000);
-                true_ending_stage += 1;
-                createPromptItems(["Roll D20", "Flee"]);
-                restoreHeart();
-                addHeartPointer("Roll D20");
-                fadeIn(document.getElementById("prompt"));
-                fadeIn(document.getElementById("navigate-tip"));
-            } else if (true_ending_stage == 4) {
                 typewrite(".");
                 await sleep(2000);
                 true_ending_stage += 1;
@@ -674,7 +641,7 @@
                 addHeartPointer("Roll D20");
                 fadeIn(document.getElementById("prompt"));
                 fadeIn(document.getElementById("navigate-tip"));
-            } else if (true_ending_stage == 5) {
+            } else if (true_ending_stage == 4) {
                 typewrite(".. do I mean anything to you?");
                 await sleep(3500);
                 true_ending_stage += 1;
@@ -683,7 +650,7 @@
                 addHeartPointer("Roll D20");
                 fadeIn(document.getElementById("prompt"));
                 fadeIn(document.getElementById("navigate-tip"));
-            } else if (true_ending_stage == 6) {
+            } else if (true_ending_stage == 5) {
                 typewrite(".. wait, really?");
                 await sleep(3500);
                 typewrite("So I'm not just a mysterious figure?");
@@ -694,7 +661,7 @@
                 addHeartPointer("Roll D20");
                 fadeIn(document.getElementById("prompt"));
                 fadeIn(document.getElementById("navigate-tip"));
-            } else if (true_ending_stage == 7) {
+            } else if (true_ending_stage == 6) {
                 playPause(false);
                 typewrite(".. wait, this means..");
                 await sleep(1500);
