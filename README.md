@@ -9,9 +9,13 @@ Made for the SoM Survey Expedition.
 Spanky's (full name Spanky's Mysterious Dice Rolling Game) is a text-based dice rolling game that is not as it seems. There are 5 endings, one that you must get via console and one that you must get by completing 4 / 5 endings.
 
 `Cheater Ending`: Easiest to get, have a look through the SoM devlogs to find it!
+
 `Lucky Ending`: Roll a natural 16 or above to get this ending.
+
 `Determination Ending`: Win an odd/even roll at the end of the game.
+
 `Attempted Ending`: Fail all rolls within the game.
+
 `True Ending`: Collect all previous endings and press the enter key on "Flee" when it shows up.
 
 Trust me, the True Ending is worth it :)
